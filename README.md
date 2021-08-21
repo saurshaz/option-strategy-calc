@@ -1,35 +1,4 @@
-# React Extension Boilerplate for Chrome and Firefox
-
-[![Fork](https://img.shields.io/github/forks/kryptokinght/react-extension-boilerplate.svg) ](https://github.com/kryptokinght/react-extension-boilerplate/network/members)
-[![Issues](https://img.shields.io/github/issues/kryptokinght/react-extension-boilerplate.svg) ](https://github.com/kryptokinght/react-extension-boilerplate/issues)
-[![Stars](https://img.shields.io/github/stars/kryptokinght/react-extension-boilerplate.svg) ](https://github.com/kryptokinght/react-extension-boilerplate/stargazers)
-[![Watchers](https://img.shields.io/github/watchers/kryptokinght/react-extension-boilerplate.svg) ](https://github.com/kryptokinght/react-extension-boilerplate/watchers)
-[![MIT license](https://img.shields.io/github/license/GirlScriptSummerOfCode/Upay.svg)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/kryptokinght/react-extension-boilerplate/pulls)
-
-**Still in Development!**
-<em>
-  
-  :zap: Are you trying to create a **web Extension** but still looking for a starting point? <br/>
-  :zap: Do you want your extension to run in both Firefox and Chrome? <br/>
-  :zap: Are you tired of repeteadly reloading your extension after every small change you make? <br/>
-  :zap: Do you want to develop your exetension using modern technologies like **React, Webpack, Jest**? <br/>
-
-</em>
-
-<br/>
-
-***We have a solution!***
-
-React Extension Boilerplate is a modern web extension template for building 
-Mozilla and Chrome extensions using ReactJS.
-
-Allows smooth and fast development of extension using on-the-go loading, building, packaging and publishing on the most common browsers Chrome and Firefox.<br/>
-Make changes to the source code and watch the extension implement these changes live in the browser.
-<br/> 
-Implements all the best Javascript practises with ESLint, Jest, React-StoryBook, Webpack and lots more. 
-
-* Source: [https://github.com/kryptokinght/react-extension-boilerplate](https://github.com/kryptokinght/react-extension-boilerplate)
+# Kite OPTION Strategy Calculation Extension Boilerplate for Chrome and Firefox
 
 
 ## Installation :checkered_flag:
@@ -40,7 +9,7 @@ Installing this boilerplate is as simple as cloning this repo in a new folder an
 
 ```bash
 # clone the git repo
-$ git clone https://github.com/kryptokinght/react-extension-boilerplate.git
+$ git clone https://github.com/saurshaz/option-strategy-calc.git
 
 # Install dependencies
 $ npm install
@@ -82,9 +51,6 @@ Any component which you not require, suppose you don't need *sidebar*, you can s
 
 Suppose you don't want to use React in your [popup](src/popup) to develop UI. You can delete all the files inside the popup folder **only leaving** the [**`template.html`**] inside it. <br/>
 You can use this `template.html` as your `popup.html`. **BUT** any scripts or CSS files referenced inside this template.html should be put inside the `src/lib` folder.<br/>
-
-#### [Example of an extension bootstrapped using React Extension Boilerplate that doesn't use React!](https://github.com/kryptokinght/react-extension-boilerplate-example)  
-
 ### Storing static assets like images, fonts
 
 Separate folders have been provided to store these static assets. 
@@ -92,14 +58,6 @@ Separate folders have been provided to store these static assets.
 * `/src/fonts`
   
 These assets are copied as it is to the build folder, just like the `/src/lib` folder.
-
-### Delete unnecessary files from the boilerplate
-
-Files like CODETOUR.md, CONTRIBTUING.md, README.md, LICENSE in case they are not relavant to your project. [Once the CLI tool is build](https://github.com/kryptokinght/react-extension-boilerplate/issues/4), it will help you scaffold the extension without including these unnecessary files.
-
-If you need any further help regarding feel free to ask on our [Gitter community](https://gitter.im/react-boilerplate-extension/community) or create an issue.
-
-
 
 ## Build :wrench: :hammer:
 
