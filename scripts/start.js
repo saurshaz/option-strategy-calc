@@ -1,7 +1,7 @@
 /* Minimal start.js file */
 
-process.env.BABEL_ENV = 'development';
-process.env.NODE_ENV = 'development';
+// process.env.BABEL_ENV = 'development';
+// process.env.NODE_ENV = 'development';
 
 const chalk = require('chalk');
 const webpack = require('webpack');
