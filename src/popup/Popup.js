@@ -1,6 +1,57 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import "./manager";
+
+
+let activePositionId = 0;
+
+// var message = {
+//   action: 'getCookies',
+//   url: 'https://kite.zerodha.com/',
+//   cookieName: 'enctoken',
+//   callback: function(result) {
+//     alert(result);
+//     var cookieText = result.cookieName + '=' + result.cookieValue;
+//     // $('#target-cookie').text('target cookie: ' + cookieText);
+
+//     passToBackground({
+//       action: 'xhr',
+//       xhr: {
+//         url: 'http://faketarget:8192/status',
+//         headers: {cookie: cookieText},
+//       },
+//       callback: function(result) {
+//         // data, status, xhr
+//         alert(result.responseText);
+//       },
+//     });
+//   },
+// };
+function showAlert(message) {
+  console.log(window.localStorage.getItem(''))
+  // alert(message);
+}
+
+// // The async IIFE is necessary because Chrome <89 does not support top level await.
+window.chrome.tabs.query({ active: true, currentWindow: true }, (tab) => {
+  console.log('MANAGER');
+  if (tab && tab[0]?.url) {
+    try {
+      let url = new URL(tab[0].url);
+      let name = 'World';
+      window.chrome.scripting.executeScript({
+        target: {tabId: tab[0].id},
+        func: showAlert,
+        args: [name]
+      });
+      // input.value = url.hostname;
+      console.log(url);
+    } catch {}
+  }
+});
+
+
+// FIXME: move above code to separate file
+
 // alert(cookieMatch('__storejs_kite_enctoken', 'https://kite.zerodha.com'))
 import "./Popup.css";
 import {
@@ -144,7 +195,6 @@ function getLastThursday(month) {
   return (thursdays[4] || thursdays[3]).getDate();
 }
 
-console.log(getLastThursday(8));
 // var myCookies = getCookies();
 // console.log(myCookies);
 
@@ -187,8 +237,15 @@ const getZeroPositions = (token) => {
               if (isNaN(parseInt(_position_match[3]))) {
                 // all_positions[symbol] = all_positions[symbol] || [];
                 console.log(_position_match[3]);
+                const  monthlies = {
+                  'JAN': 0,
+                  'FEB': 1,
+                  'MAR': 2,
+                  'SEP': 8,
+                }
+                console.log(_position_match[3]);
                 let exp_date = new Date(
-                  `${getLastThursday(7)}/${monthWeek}/21`
+                  `${getLastThursday(monthlies[_position_match[3]])}/${monthWeek}/21`
                 ); // FIXME: month index hardcoded
                 expiry = `${("0" + exp_date.getDate()).slice(
                   -2
@@ -213,8 +270,8 @@ const getZeroPositions = (token) => {
               // const positions = all_positions[symbol] || {};
               all_positions[symbol] = all_positions[symbol] || [];
               all_positions[symbol].push({
-                side: _position?.buy_quantity ? "+" : "-",
-                quantity: _position?.buy_quantity || _position?.sell_quantity,
+                side: _position?.buy_quantity ? "+" : "",
+                quantity: _position?.quantity,
                 expiry, //"02SEP2021",
                 strike,
                 price: _position?.average_price,
@@ -226,6 +283,30 @@ const getZeroPositions = (token) => {
         console.log("** getZero");
         console.log(all_positions);
         resolve(all_positions);
+      })
+      .catch((err) => reject(err));
+  });
+};
+
+
+const getZeroPrice = (args) => {
+  const all_positions = {};
+  return new Promise((resolve, reject) => {
+    axios({
+      url: `https://tradepron.vercel.app/api/prices?s=BANKNIFTY&q=25&st=36000&ty=CE&ex=21902&si=BUY&ot=MARKET&p=NRML&v=regular`,
+      method: "GET",
+      headers: {
+        "x-tok": `${'7iGisRqn+fKeSYcOI2frPUofZxDPXlSBStJZHFVuWkRwiZJI0qfgSF3B6eOxz9vDF/YT+ouh4SCcySHhRd1Zd3hgK6uPN8TQwVP8CG1Zr54NbqseYBwMlw=='}`,
+        "content-type": "application/json",
+      },
+      data: "[{\"exchange\":\"NFO\",\"tradingsymbol\":\"BANKNIFTY2190235600PE\",\"transaction_type\":\"BUY\",\"variety\":\"regular\",\"product\":\"NRML\",\"order_type\":\"LIMIT\",\"quantity\":25,\"price\":345}]",
+    })
+      .then((response) => response?.data?.data)
+      .then((response) => {
+        console.log("**** zerodha pricing ****");
+        console.log("** getZero");
+        console.log(response);
+        resolve(response);
       })
       .catch((err) => reject(err));
   });
@@ -363,12 +444,16 @@ export const CustomLegInput = ({
       <button
         className="btn"
         onClick={() => {
-          positions.legs[symbol].map((_leg, idx) => {
-            if (leg.strike === _leg.strike) {
-              positions.legs.splice(idx, 1);
-              setPositions({ ...positions, legs: positions.legs });
-            }
-          });
+          if(positions?.legs && positions.legs[symbol]){
+            // // The async IIFE is necessary because Chrome <89 does not support top level await.
+          } else {
+            positions.legs[symbol].map((_leg, idx) => {
+              if (leg.strike === _leg.strike) {
+                positions.legs.splice(idx, 1);
+                setPositions({ ...positions, legs: positions.legs });
+              }
+            });
+          }
         }}
       >
         delete
@@ -400,7 +485,7 @@ export const NetSummary = ({ data, positions, symbol, payoffDate }) => {
 
   return (
     <div className="row">
-      {positions?.legs[symbol].map((leg, idx) => {
+      {positions?.legs[symbol] && positions?.legs[symbol].map((leg, idx) => {
         // const isLoss = (data?.pnl && data?.pnl[idx]["P&L"] < 0) || false;
         return (
           <div style={{ padding: 10 }}>
@@ -621,7 +706,7 @@ export const PayoffChart = ({
         />
         <Tooltip content={<CustomTooltip spotPrice={data?.spotPrice} />} />
 
-        {positions?.legs &&
+        {positions?.legs && positions.legs[symbol] &&
           positions.legs[symbol]?.map((leg, _idx) => (
             <ReferenceLine
               key={_idx}
@@ -693,9 +778,9 @@ export const Container = ({
   positions,
   setPositions,
   setData,
-  payoffDate,
 }) => {
   const [symbol, setSymbol] = useState(positions?.symbol);
+  const [payoffDate, setPayoffDate] = useState(getLastThursday(new Date().month + 1));
   // const [trades, setTrades] = useState()
 
   console.log(positions);
@@ -761,44 +846,78 @@ export const Container = ({
     let c = symbol + "$";
     console.log(
       `positions.payoff_date is ${positions.payoff_date || payoffDate}`
-    );
-    positions.legs[symbol].map((leg, index) => {
-      if (index != 0) {
-        c += `&`;
-      }
-      c += `${leg.side}${leg.quantity}x${leg.strike}${leg.optType}x${leg.expiry}x${leg.price}x0x0`;
-    });
-    c += `$${positions.payoff_date || payoffDate}$0$0$0`;
+      );
+      
+      if (!(positions?.legs && positions.legs[symbol])) {
 
-    if (positions.legs[symbol].length > 0) {
-      axios({
-        // url:
-        // "https://5000-maroon-guanaco-brwprwdd.ws-us14.gitpod.io/api/op?c=" + encodeURIComponent(document.location.search.replace('?c=','')),
-        url: "https://tradepron.vercel.app/api/op?c=" + encodeURIComponent(c),
-        method: "get",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }).then((res) => {
-        console.log(res);
-        setData(res.data);
+        window.chrome.tabs.query({ active: true, currentWindow: true }, (tab) => {
+          console.log('MANAGER');
+          if (tab && tab[0]?.url) {
+            window.chrome.scripting.executeScript({
+              target: {tabId: tab[0].id},
+              func: showAlert,
+              args: ['NO SYMBOL SELECTED']
+            });
+          }
+        });
+      } else if (positions?.legs && positions.legs[symbol]) {
+      positions.legs[symbol].map((leg, index) => {
+        if (index != 0) {
+          c += `&`;
+        }
+        c += `${leg.side}${leg.quantity}x${leg.strike}${leg.optType}x${leg.expiry}x${leg.price}x0x0`;
       });
+      c += `$${positions.payoff_date || payoffDate}$0$0$0`;
+      console.log(c);
+      if (positions.legs[symbol].length > 0) {
+        axios({
+          // url:
+          // "https://5000-maroon-guanaco-brwprwdd.ws-us14.gitpod.io/api/op?c=" + encodeURIComponent(document.location.search.replace('?c=','')),
+          // url: "https://tradepron.vercel.app/api/op?c=" + encodeURIComponent(c),
+          
+          url: "http://localhost:5000/api/op?c=" + encodeURIComponent(c),
+          method: "get",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }).then((res) => {
+          console.log(res);
+          setData(res.data);
+        });
+      }
     }
   };
-
+  console.log((positions?.legs && positions?.legs[symbol] && positions?.legs[symbol]?.length > 0 ))
   return (
     <div className="container">
       <div className="black-label">
-        <label>Symbol:{" "}</label>
+        <label>Symbol: </label>
         <input
           title="Symbol"
           placeholder="symbol"
-          className="input"
+          className="form-field"
           type="text"
           value={symbol}
-          onChange={() => setSymbol(window.event.target.value)}
+          onChange={() => setSymbol(window?.event?.target?.value)}
         />
+         <label>Payoff Date: </label>
+        {/* <input
+          title="PayoffDate"
+          placeholder="Payoff Date:"
+          className="form-field"
+          type="text"
+          value={payoffDate}
+          onChange={() => setPayoffDate(window?.event?.target?.value)}
+        /> */}
       </div>
+      <input type="text" className="form-field" placeholder="Name of position"/>
+      <button
+        className="btn-primary"
+        type="button"
+        onClick={() => setPositionId("1")}
+      >
+        SAVE POSITION
+      </button>
       <div className="accordion" id="accordionExample">
         <div className="accordion-item">
           <h2 className="accordion-header headingOne">
@@ -822,7 +941,7 @@ export const Container = ({
               <Form
                 schema={schema}
                 formData={{
-                  legs: positions?.legs[symbol],
+                  legs: positions?.legs && positions?.legs[symbol],
                   payoff_date: payoffDate,
                 }}
                 UISchema={{
@@ -848,50 +967,52 @@ export const Container = ({
               />
             </div>
           </div>
-          <div className="accordion-item">
-            <h2 className="accordion-header headingTwo">
-              <button
-                className="accordion-button"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target=".collapseTwo"
-                aria-expanded="true"
-                aria-controls="collapseTwo"
+          { (positions?.legs && positions?.legs[symbol] && positions?.legs[symbol]?.length > 0)?
+            <div className="accordion-item">
+              <h2 className="accordion-header headingTwo">
+                <button
+                  className="accordion-button"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target=".collapseTwo"
+                  aria-expanded="true"
+                  aria-controls="collapseTwo"
+                >
+                  Payoff Chart
+                </button>
+              </h2>
+              <div
+                className="collapseTwo accordion-collapse"
+                aria-labelledby="headingTwo"
+                data-bs-parent=".accordionExample"
               >
-                Payoff Chart
-              </button>
-            </h2>
-            <div
-              className="collapseTwo accordion-collapse"
-              aria-labelledby="headingTwo"
-              data-bs-parent=".accordionExample"
-            >
-              <div className="accordion-body">
-                <div className={"container"}>
-                  <div className="row">
-                    <NetSummary
-                      positions={positions}
-                      data={data}
-                      symbol={symbol}
-                      payoffDate={payoffDate}
-                    />
-                  </div>
+                <div className="accordion-body">
+                  <div className={"container"}>
+                    <div className="row">
+                      <NetSummary
+                        positions={positions}
+                        data={data}
+                        symbol={symbol}
+                        payoffDate={payoffDate}
+                      />
+                    </div>
 
-                  <div className="row">
-                    <NetPnl data={data} />
+                    <div className="row">
+                      <NetPnl data={data} />
+                    </div>
                   </div>
+                  <PayoffChart
+                    positions={positions}
+                    setPositions={setPositions}
+                    data={data}
+                    setData={setData}
+                    symbol={symbol}
+                    computeTradeGraph={computeTradeGraph}
+                  />
                 </div>
-                <PayoffChart
-                  positions={positions}
-                  setPositions={setPositions}
-                  data={data}
-                  setData={setData}
-                  symbol={symbol}
-                  computeTradeGraph={computeTradeGraph}
-                />
               </div>
             </div>
-          </div>
+          : null }  
         </div>
       </div>
     </div>
@@ -905,11 +1026,13 @@ function ZeroTradeApp({ legs, symbol, payoffDate, token }) {
     greeks: {},
     positions: [],
   });
-  const [positionId, setPositionId] = useState("1");
-  const [positions, setPositions] = useState({
+  const [positionId, setPositionId] = useState(0);
+  const initialPositions = window.localStorage.getItem(positionId) ? {
     ...JSON.parse(window.localStorage.getItem(positionId)),
     ...legs,
-  });
+  }: {}
+
+  const [positions, setPositions] = useState(initialPositions);
 
   useEffect(() => {
     // setPositions(JSON.parse(window.localStorage.getItem(positionId)));
@@ -957,11 +1080,14 @@ function ZeroTradeApp({ legs, symbol, payoffDate, token }) {
 
 const Popup = () => {
   const [zero_data, setZeroData] = useState({});
-  const [symbol, setSymbol] = useState("BANKNIFTY");
+  const [symbol, setSymbol] = useState("");
   const [authtoken, setAuthtoken] = useState(
     window.localStorage.getItem("authtoken") || ""
   );
-  useEffect(() => {}, []);
+  useEffect(() => {
+    getZeroPrice('').then((d) => console.log)
+
+  }, []);
   return zero_data ? (
     <div className="popup">
       <select
@@ -987,7 +1113,7 @@ const Popup = () => {
           token={authtoken}
           legs={zero_data || []}
           symbol={symbol}
-          payoffDate={"2021-08-26"}
+          payoffDate={"2021-09-30"}
         />
       ) : (
         <div>

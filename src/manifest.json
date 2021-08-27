@@ -8,7 +8,7 @@
   "permissions": [
     "scripting",
     "activeTab",
-    "https://*.zerodha.com/*"
+    "https://kite.zerodha.com"
   ],
   "action": {
     "default_popup": "popup.html"

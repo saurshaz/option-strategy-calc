@@ -1,26 +1,6 @@
 
 
-// function showAlert(givenName) {
-//   alert(` ${givenName} ${window.localStorage.getItem('enctoken')}`);
-//   //   alert(`Hello, ${givenName}`);
-// }
-// // The async IIFE is necessary because Chrome <89 does not support top level await.
-// window.chrome.tabs.query({ active: true, currentWindow: true }, (tab) => {
-//   console.log('MANAGER');
-//   if (tab && tab[0]?.url) {
-//     try {
-//       let url = new URL(tab[0].url);
-//       let name = 'World';
-//       window.chrome.scripting.executeScript({
-//         target: {tabId: tab[0].id},
-//         func: showAlert,
-//         args: [name]
-//       });
-//       // input.value = url.hostname;
-//       console.log(url);
-//     } catch {}
-//   }
-// });
+
 
 
 // http://stackoverflow.com/questions/9515704/building-a-chrome-extension-inject-code-in-a-page-using-a-content-script

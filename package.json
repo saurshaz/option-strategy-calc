@@ -1,7 +1,8 @@
 {
-  "name": "react-extension-boilerplate",
+  "name": "option-strategy-payoff-extension",
+  "homepage" : "http://saurshaz.github.io/option-strategy-payoff-extension",
   "version": "1.0.0",
-  "description": "Modern React boilerplate for Firefox and Chrome extensions",
+  "description": "Payoff strategy Viewer for Firefox and Chrome extensions",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start:chrome": "npm run chrome-launch",

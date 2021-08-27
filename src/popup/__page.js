@@ -1,8 +1,8 @@
 
-// function showAlert(givenName) {
-//   alert(` ${givenName} ${window.localStorage.getItem('enctoken')}`);
-//   //   alert(`Hello, ${givenName}`);
-// }
+function showAlert(givenName) {
+  alert(` ${givenName} ${window.localStorage.getItem('enctoken')}`);
+  //   alert(`Hello, ${givenName}`);
+}
 
 var callbackRegistry = {};
 
