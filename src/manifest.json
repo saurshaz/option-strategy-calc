@@ -1,16 +1,10 @@
-
 {
-  "name": "kiter",
-  "manifest_version": 3,
-  "background": {
-    "service_worker": "background.js"
+  "manifest_version": 2,
+  "name": "KTRR",
+  "description": "KITE from Zerodha positions",
+  "version": "1.0.0",
+  "browser_action": {
+      "default_popup": "popup.html"
   },
-  "permissions": [
-    "scripting",
-    "activeTab",
-    "https://kite.zerodha.com"
-  ],
-  "action": {
-    "default_popup": "popup.html"
-  }
+  "permissions": ["tabs", "activeTab", "notifications", "http://*/", "https://*/"]
 }

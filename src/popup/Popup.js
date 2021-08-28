@@ -1,8 +1,45 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-
-
 let activePositionId = 0;
+
+
+class MockDB {
+  constructor(){
+    // this.historyStrategies will be an array of names of all saved strategies
+    if (!window.localStorage.getItem('historyStrategies')) {
+      window.localStorage.setItem('historyStrategies', '[]');
+      this.historyStrategies = [];
+    } else {
+      this.historyStrategies = window.localStorage.getItem('historyStrategies') ? JSON.parse(window.localStorage.getItem('historyStrategies')) : [];
+    }
+  }
+
+  sync(){
+    this.historyStrategies = window.localStorage.getItem('historyStrategies') ? JSON.parse(window.localStorage.getItem('historyStrategies')) : [];  
+  }
+
+  insert(savedStrategyName){
+    this.historyStrategies.push(savedStrategyName) 
+    window.localStorage.setItem('historyStrategies',  this.historyStrategies ? JSON.stringify(this.historyStrategies) : "[]");  
+  }
+
+  get(key){
+    return JSON.parse(window.localStorage.getItem(key)) || {};
+  }
+
+  set(key, val){
+    if(key && val){
+      window.localStorage.setItem(key, JSON.stringify(val));
+      this.insert(key);
+      return true;
+    }
+    return false;
+  }
+
+  remove(key){
+    window.localStorage.removeItem(key);
+  }
+}
 
 // var message = {
 //   action: 'getCookies',
@@ -778,9 +815,12 @@ export const Container = ({
   positions,
   setPositions,
   setData,
+  payoffDate,
+  symbol,
+  db,
 }) => {
-  const [symbol, setSymbol] = useState(positions?.symbol);
-  const [payoffDate, setPayoffDate] = useState(getLastThursday(new Date().month + 1));
+  const [positionSaveName, setPositionSaveName] = useState("<strategy-name>");
+  // const [payoffDate, setPayoffDate] = useState(getLastThursday(new Date().month + 1));
   // const [trades, setTrades] = useState()
 
   console.log(positions);
@@ -891,16 +931,7 @@ export const Container = ({
   return (
     <div className="container">
       <div className="black-label">
-        <label>Symbol: </label>
-        <input
-          title="Symbol"
-          placeholder="symbol"
-          className="form-field"
-          type="text"
-          value={symbol}
-          onChange={() => setSymbol(window?.event?.target?.value)}
-        />
-         <label>Payoff Date: </label>
+        <label>Payoff Date: </label>
         {/* <input
           title="PayoffDate"
           placeholder="Payoff Date:"
@@ -910,11 +941,20 @@ export const Container = ({
           onChange={() => setPayoffDate(window?.event?.target?.value)}
         /> */}
       </div>
-      <input type="text" className="form-field" placeholder="Name of position"/>
+      <input type="text" className="form-field" value={positionSaveName} onChange={() => {
+        setPositionSaveName(window.event.target.value)
+      }} placeholder="Name of position"/>
       <button
         className="btn-primary"
         type="button"
-        onClick={() => setPositionId("1")}
+        onClick={() => {
+          if (positionSaveName) {
+            // setPositionId("1")
+            db.set(positionSaveName, { positions, data });
+            db.sync();
+            //  against position name we save positions and ,data
+          }
+        }}
       >
         SAVE POSITION
       </button>
@@ -1019,41 +1059,37 @@ export const Container = ({
   );
 };
 
-function ZeroTradeApp({ legs, symbol, payoffDate, token }) {
+function ZeroTradeApp({ db, legs, symbol, payoffDate, token }) {
   const [data, setData] = useState({
     legs,
     pnl: {},
     greeks: {},
     positions: [],
   });
-  const [positionId, setPositionId] = useState(0);
-  const initialPositions = window.localStorage.getItem(positionId) ? {
-    ...JSON.parse(window.localStorage.getItem(positionId)),
-    ...legs,
-  }: {}
+  
+  const [strategyId, setStrategyId] = useState('ABC');
+  const initialPositions = db.get(strategyId) || {};
 
   const [positions, setPositions] = useState(initialPositions);
 
-  useEffect(() => {
-    // setPositions(JSON.parse(window.localStorage.getItem(positionId)));
-  }, [positionId]);
-
   return (
     <>
-      <button
-        className="btn-primary"
-        type="button"
-        onClick={() => setPositionId("1")}
-      >
-        Position # 1
-      </button>
-      <button
+      <select onChange={() => {
+        let activeStrategy = db.get(window.event.target.value);
+        setPositions(activeStrategy.positions);
+        setData(activeStrategy.data);
+      }}>
+        {db.historyStrategies.map((stratName) => {
+          return (<option value={stratName}>{stratName}</option>)
+        })}
+      </select>
+      {/* <button
         className="btn-primary"
         type="button"
         onClick={() => setPositionId("2")}
       >
         Position # 2
-      </button>
+      </button> */}
 
       <button
         className="btn-primary"
@@ -1069,7 +1105,9 @@ function ZeroTradeApp({ legs, symbol, payoffDate, token }) {
       </button>
       <Container
         setData={setData}
+        db={db}
         data={data}
+        symbol={symbol}
         positions={positions}
         payoffDate={payoffDate}
         setPositions={setPositions}
@@ -1078,9 +1116,10 @@ function ZeroTradeApp({ legs, symbol, payoffDate, token }) {
   );
 }
 
-const Popup = () => {
+export const Popup = () => {
   const [zero_data, setZeroData] = useState({});
   const [symbol, setSymbol] = useState("");
+  const [payoffDate, setPayoffDate] = useState("2021-09-02");
   const [authtoken, setAuthtoken] = useState(
     window.localStorage.getItem("authtoken") || ""
   );
@@ -1108,12 +1147,22 @@ const Popup = () => {
           window.localStorage.setItem("authtoken", window.event.target.value);
         }}
       ></input>
+      <input
+        className="form-control"
+        type="text"
+        value={payoffDate}
+        onChange={() => {
+          setPayoffDate(window.event.target.value);
+        }}
+      ></input>
+
       {authtoken ? (
-        <ZeroTradeApp
+        <ZeroTradeApp 
+          db = {new MockDB()}
           token={authtoken}
           legs={zero_data || []}
           symbol={symbol}
-          payoffDate={"2021-09-30"}
+          payoffDate={"2021-09-02"}
         />
       ) : (
         <div>
