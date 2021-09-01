@@ -6,6 +6,7 @@ let activePositionId = 0;
 class MockDB {
   constructor(){
     // this.historyStrategies will be an array of names of all saved strategies
+    this.symbols = ['TCS', 'INFY'];
     if (!window.localStorage.getItem('historyStrategies')) {
       window.localStorage.setItem('historyStrategies', '[]');
       this.historyStrategies = [];
@@ -39,6 +40,7 @@ class MockDB {
   remove(key){
     window.localStorage.removeItem(key);
   }
+
 }
 
 // var message = {
@@ -106,111 +108,6 @@ import {
 import Form from "react-jsonschema-form";
 import resolve from "resolve";
 
-window.localStorage.setItem("11", "{}");
-
-window.localStorage.setItem(
-  "1",
-  JSON.stringify({
-    symbol: "BANKNIFTY",
-    adhocPosition: {
-      side: "+",
-      strike: 36500,
-      quantity: 50,
-      price: 344.34,
-      optType: "CE",
-      expiry: "26AUG2021",
-      payoffDate: "2021-08-26",
-    },
-    payoff_date: "2021-08-26",
-    legs: {
-      BANKNIFTY: [
-        {
-          side: "+",
-          quantity: 175,
-          expiry: "02SEP2021",
-          strike: 35100,
-          price: 483.78333333333336,
-          optType: "CE",
-        },
-        {
-          side: "+",
-          quantity: 125,
-          expiry: "26AUG2021",
-          strike: 35800,
-          price: 122.8625,
-          optType: "CE",
-        },
-      ],
-    },
-  })
-);
-
-window.localStorage.setItem(
-  "222",
-  JSON.stringify({
-    symbol: "BANKNIFTY",
-    adhocPosition: {
-      side: "+",
-      strike: 35600,
-      quantity: 100,
-      price: 181.44,
-      optType: "CE",
-      expiry: "18AUG2021",
-      payoffDate: "2021-08-18",
-    },
-    payoff_date: "2021-08-18",
-    legs: [
-      {
-        side: "+",
-        strike: 35600,
-        quantity: 100,
-        price: 181.44,
-        expiry: "18AUG2021",
-        optType: "CE",
-      },
-      {
-        side: "+",
-        quantity: 25,
-        strike: 35700,
-        price: 129.15,
-        expiry: "18AUG2021",
-        optType: "CE",
-      },
-      {
-        side: "-",
-        quantity: 25,
-        strike: 35800,
-        price: 30.2,
-        expiry: "18AUG2021",
-        optType: "CE",
-      },
-      {
-        side: "-",
-        quantity: 75,
-        strike: 36000,
-        price: 18.95,
-        expiry: "18AUG2021",
-        optType: "CE",
-      },
-      {
-        side: "+",
-        quantity: 25,
-        strike: 35600,
-        price: 684.14,
-        expiry: "02SEP2021",
-        optType: "CE",
-      },
-      {
-        side: "-",
-        quantity: 25,
-        strike: 35800,
-        price: 550.3,
-        expiry: "02SEP2021",
-        optType: "CE",
-      },
-    ],
-  })
-);
 function getLastThursday(month) {
   var d = new Date(`01-${month}-${2021}`),
     thursdays = [];
@@ -307,7 +204,7 @@ const getZeroPositions = (token) => {
               // const positions = all_positions[symbol] || {};
               all_positions[symbol] = all_positions[symbol] || [];
               all_positions[symbol].push({
-                side: _position?.buy_quantity ? "+" : "",
+                side: _position?.quantity  > 0 ? "+" : "",
                 quantity: _position?.quantity,
                 expiry, //"02SEP2021",
                 strike,
@@ -552,49 +449,49 @@ export const NetPnl = ({ data }) => {
       <div style={{ padding: 20 }}>
         <div style={{}}>
           <div>
-            <label>DTE:</label> {data.DTE}
+            <label>DTE:</label> {data?.DTE}
           </div>
           <div>
             <label>PoP:</label> {getAppropriateStyledText(data?.POP)}
           </div>
           <div>
             <label>Breakeven: </label>
-            {data.breakevens}
+            {data?.breakevens}
           </div>
         </div>
         <div style={{}}>
           <div>
-            <label>RR:</label> {data.maxRR}
+            <label>RR:</label> {data?.maxRR}
           </div>
           <div>
-            <label>Loss(Max):</label> {getAppropriateStyledText(data.maxloss)}
+            <label>Loss(Max):</label> {getAppropriateStyledText(data?.maxloss)}
           </div>
           <div>
             <label>Profit(Max):</label>{" "}
-            {getAppropriateStyledText(data.maxprofit)}
+            {getAppropriateStyledText(data?.maxprofit)}
           </div>
           <div>
             <label>Net Credit: </label>
-            {data.netcredit}
+            {data?.netcredit}
           </div>
           <div>
             <label>PnL: </label>
-            {getAppropriateStyledText(data.totalPNL)}
+            {getAppropriateStyledText(data?.totalPNL)}
           </div>
           <div>
-            <label>IV:</label> {data.underlyingiv}
+            <label>IV:</label> {data?.underlyingiv}
           </div>
           {/* <div>{JSON.stringify(data)}</div> */}
         </div>
         <div style={{}}>
           <div>
-            <label>SPOT:</label> {data.spotPrice}
+            <label>SPOT:</label> {data?.spotPrice}
           </div>
           <div>
-            <label>PnL:</label> {getAppropriateStyledText(data.totalPNL)}
+            <label>PnL:</label> {getAppropriateStyledText(data?.totalPNL)}
           </div>
           <div>
-            <label>IV:</label> {data.underlyingiv}
+            <label>IV:</label> {data?.underlyingiv}
           </div>
           {/* <div>{JSON.stringify(_datdataa)}</div> */}
         </div>
@@ -830,11 +727,11 @@ export const Container = ({
   const schema = {
     type: "object",
     properties: {
-      payoff_date: {
-        type: "string",
-        format: "date",
-        title: "Payoff Date",
-      },
+      // payoff_date: {
+      //   type: "string",
+      //   format: "date",
+      //   title: "Payoff Date",
+      // },
       legs: {
         type: "array",
         items: {
@@ -913,9 +810,9 @@ export const Container = ({
         axios({
           // url:
           // "https://5000-maroon-guanaco-brwprwdd.ws-us14.gitpod.io/api/op?c=" + encodeURIComponent(document.location.search.replace('?c=','')),
-          // url: "https://tradepron.vercel.app/api/op?c=" + encodeURIComponent(c),
+          url: "https://tradepron.vercel.app/api/op?c=" + encodeURIComponent(c),
           
-          url: "http://localhost:5000/api/op?c=" + encodeURIComponent(c),
+          // url: "http://localhost:5000/api/op?c=" + encodeURIComponent(c),
           method: "get",
           headers: {
             "Content-Type": "application/json",
@@ -950,7 +847,7 @@ export const Container = ({
         onClick={() => {
           if (positionSaveName) {
             // setPositionId("1")
-            db.set(positionSaveName, { positions, data });
+            db.set(positionSaveName, { positions, data, symbol, payoffDate });
             db.sync();
             //  against position name we save positions and ,data
           }
@@ -982,7 +879,7 @@ export const Container = ({
                 schema={schema}
                 formData={{
                   legs: positions?.legs && positions?.legs[symbol],
-                  payoff_date: payoffDate,
+                  // payoff_date: payoffDate,
                 }}
                 UISchema={{
                   quantity: {
@@ -1059,25 +956,56 @@ export const Container = ({
   );
 };
 
-function ZeroTradeApp({ db, legs, symbol, payoffDate, token }) {
-  const [data, setData] = useState({
+function ZeroTradeApp({ db, legs, token }) {
+  console.log('hello from TradeStation ', db);
+  const [strategyId, setStrategyId] = useState(strategyId || 'AAA');
+  const strategy = db.get(strategyId) ||  {
     legs,
     pnl: {},
     greeks: {},
     positions: [],
-  });
+    symbol: 'NIFTY',
+    payoffDate: '2021-09-02',
+    data: {},
+  };
   
-  const [strategyId, setStrategyId] = useState('ABC');
-  const initialPositions = db.get(strategyId) || {};
-
-  const [positions, setPositions] = useState(initialPositions);
+  const [symbol, setSymbol] = useState(strategy.symbol);
+  const [positions, setPositions] = useState(strategy.positions);
+  const [data, setData] = useState(strategy.data);
+  const [payoffDate, setPayoffDate] = useState(strategy.payoffDate);
 
   return (
     <>
+
+      <label className="form-field">SYMBOL: </label>
+      <select
+        className="form-control"
+        onChange={() => {
+          setSymbol(window.event.target.value);
+        }}
+        value={symbol}>
+        {db.symbols.map((symbol) => {
+          return (<option value={symbol}>{symbol}</option>)
+        })}
+        <option value={"BANKNIFTY"}>BANKNIFTY</option>
+        <option value={"NIFTY"}>NIFTY</option>
+      </select>
+      <input
+        className="form-control"
+        type="text"
+        value={payoffDate}
+        onChange={() => {
+          setPayoffDate(window.event.target.value);
+        }}
+      ></input>
+
       <select onChange={() => {
         let activeStrategy = db.get(window.event.target.value);
+        console.log(`activeStrategy `, activeStrategy);
         setPositions(activeStrategy.positions);
         setData(activeStrategy.data);
+        setSymbol(activeStrategy.symbol);
+        setPayoffDate(activeStrategy.payoffDate);
       }}>
         {db.historyStrategies.map((stratName) => {
           return (<option value={stratName}>{stratName}</option>)
@@ -1097,6 +1025,7 @@ function ZeroTradeApp({ db, legs, symbol, payoffDate, token }) {
         onClick={() => {
           getZeroPositions(token).then((all_positions) => {
             setPositions({ legs: all_positions, symbol });
+            setSymbol(symbol);
             document.querySelector('[type="submit"]').click();
           });
         }}
@@ -1118,26 +1047,15 @@ function ZeroTradeApp({ db, legs, symbol, payoffDate, token }) {
 
 export const Popup = () => {
   const [zero_data, setZeroData] = useState({});
-  const [symbol, setSymbol] = useState("");
-  const [payoffDate, setPayoffDate] = useState("2021-09-02");
   const [authtoken, setAuthtoken] = useState(
     window.localStorage.getItem("authtoken") || ""
   );
   useEffect(() => {
-    getZeroPrice('').then((d) => console.log)
+    // getZeroPrice('').then((d) => console.log)
 
   }, []);
   return zero_data ? (
     <div className="popup">
-      <select
-        className="form-control"
-        onChange={() => {
-          setSymbol(window.event.target.value);
-        }}
-      >
-        <option value={"BANKNIFTY"}>BN</option>
-        <option value={"NIFTY"}>NIFTY</option>
-      </select>
       <input
         className="form-control"
         type="text"
@@ -1147,22 +1065,12 @@ export const Popup = () => {
           window.localStorage.setItem("authtoken", window.event.target.value);
         }}
       ></input>
-      <input
-        className="form-control"
-        type="text"
-        value={payoffDate}
-        onChange={() => {
-          setPayoffDate(window.event.target.value);
-        }}
-      ></input>
 
       {authtoken ? (
         <ZeroTradeApp 
           db = {new MockDB()}
           token={authtoken}
           legs={zero_data || []}
-          symbol={symbol}
-          payoffDate={"2021-09-02"}
         />
       ) : (
         <div>
