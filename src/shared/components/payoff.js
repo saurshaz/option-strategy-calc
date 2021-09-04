@@ -6,8 +6,8 @@ import {
   Tooltip, XAxis,
   YAxis
 } from "recharts";
-import { CustomLegInput } from '../components/custom_leg';
-import { CustomTooltip } from '../components/tooltip';
+import { CustomLegInput } from './custom_leg';
+import { CustomTooltip } from './tooltip';
 import { showAlert } from '../helpers/browser';
 
 

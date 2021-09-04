@@ -10,6 +10,7 @@ export const WrappedApp = () => {
   );
   useEffect(() => {
     // getZeroPrice('').then((d) => console.log)
+    console.log('WrappedApp');
 
   }, []);
   return zero_data ? (

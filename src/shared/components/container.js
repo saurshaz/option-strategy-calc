@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
-import { EditStrategyForm } from '../components/edit_strategy_form';
-import { NetPnl } from '../components/net_pnl';
-import { NetSummary } from '../components/net_summary';
-import { PayoffChart } from '../components/payoff';
+import { EditStrategyForm } from './edit_strategy_form';
+import { NetPnl } from './net_pnl';
+import { NetSummary } from './net_summary';
+import { PayoffChart } from './payoff';
 import { computeTradeGraph } from '../helpers/utils';
 import { showAlert } from '../helpers/browser';
   

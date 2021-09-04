@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Container } from '../components/container';
+import { Container } from './container';
 import { getZeroPositions } from '../helpers/api';
 
 export const ZeroTradeApp = ({ db, legs, token }) => {
